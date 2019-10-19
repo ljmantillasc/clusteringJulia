@@ -1,6 +1,6 @@
-path = "C:/Users/luism/OneDrive/Escritorio/parallel"
-using Distributed
-
+#path = "C:/Users/luism/OneDrive/Escritorio/parallel"
+path = pwd()
+#using Distributed
 include(path*"/src/lib/BasicOperation.jl")
 include(path*"/src/lib/matrixOperation.jl")
 include(path*"/src/parallel/ParallelOperation.jl")
@@ -9,10 +9,6 @@ include(path*"/src/data/ModuleEnviroment.jl")
 include(path*"/src/lib/process.jl")
 include(path*"/src/clusterValidity/clusterValidity.jl")
 
-#using ModuleEnviroment
-#using SecuencialOperation
-#using Process
-#using clusterValidity
 using HDF5
 using JLD2
 using DataFrames
@@ -52,7 +48,7 @@ function prepareAndLoadData(string, cls)
   global auxdata
   clusters = cls
   println("hasta aqui")
-  @load string auxdata
+  @load pwd()*"/data/"string auxdata
   dim = size(auxdata)
   println(dim)
   data    = [auxdata[i,:] for i=1:dim[1]]
@@ -269,20 +265,45 @@ function pruebasEspecificasE(cls)
     end
 end
 
-
 function generaDatos()
   count1 = 1
   x = 2000
   y = 2000
-  for m=1:6
-    for l=1:6
-      prepareAndLoadData(x,y,x+200,y+200,"c:/imagen.tif")
+  for m=1:10
+    for l=1:10
+      prepareAndLoadData(x,y,x+700,y+700,"c:/imagen.tif")
       #println("$x $y")
-      y = y + 200
+      y = y + 100
       @save "dataimage$count1.jld2" auxdata
       count1 = count1 + 1
     end
-    x = x + 200
+    x = x + 100
     y = 2000
   end
+end
+
+function prepareAndLoadData(x1, y1, x2, y2, path)
+  global clusters
+  global matu
+  global mate
+  global matc
+  global data
+  global dim
+  global auxdata
+  auxdata = em.openDataCustomImage(x1,y1,x2,y2,path)
+  #dim = size(auxdata)
+  #data    = [auxdata[i,:] for i=1:dim[1]]
+  #matu = ps.generaU(data, clusters)
+  #mate = ps.generaE(data)
+  #matc = ps.generaC(data, clusters)
+end
+
+function cargatabla(nombre)
+  final = zeros(7,6)
+  for k=2:14
+    aux2 = CSV.read("out/indices/$nombre$k.csv" ;  delim=',')
+    aux = [ aux2[i,j] for i=1:7,j=1:6]
+    final = final + aux
+  end
+  return final/13
 end
